@@ -1,5 +1,7 @@
 # -*- coding: utf8 -*-
 import pandas as pd
+import numpy as np
+import functools as ft
 
 class Measure:
     HourField = 3
@@ -33,14 +35,49 @@ class Measure:
         return self.data_frame.iloc[row, Measure.HourField+start:Measure.HourField+end]
 
     def get_column_data(self, day, col=0):
+        print("day = {}, col = {}".format(day, col))
         row_start = Measure.DayStride * day
         return self.data_frame.iloc[row_start: row_start+Measure.DayStride, Measure.HourField+col]
 
 
 measure = Measure()
 df = measure.convert_data()
-d1 = measure.get_row_data(2*Measure.DayStride+Measure.RainFallField)
-print(d1)
+d1 = measure.get_row_data(2*Measure.DayStride + Measure.RainFallField)
 
 
+def w_loss(w,x,b,y_hat):
+    y_star = sum(np.add(np.dot(w, x), b))
+    return pow(y_hat - y_star, 2)
 
+def b_loss(b,x,w,y_hat):
+    y_star = sum(np.add(np.dot(w, x), b))
+    return pow(y_hat - y_star, 2)
+
+def partial_difference_quotient(f, v, i, h):
+    """計算 f 在 v 中第 i 個元素所對應的差商"""
+    w = [v_j + (h if j == i else 0) for j, v_j in enumerate(v)]
+    return (f(w) - f(v)) / h
+
+
+"""learning rate"""
+eta = 0.001
+w = list([0])
+b = list([0])
+y = list([0])
+
+for day in range(30):
+    for hour in range(24):
+        for k, _ in enumerate(range(len(w))):
+            data = measure.get_column_data(day, hour)
+            x = [int(data[9])]
+            w_fn = ft.partial(w_loss, y_hat=y[k], x=x, b=b)
+            dw = partial_difference_quotient(w_fn, w, k, 0.001)
+
+            b_fn = ft.partial(b_loss, y_hat=y[k], w=w, x=x)
+            db = partial_difference_quotient(b_fn, b, k, 0.001)
+
+            w[k] = w[k] - eta * dw
+            b[k] = b[k] - eta * db
+            y = x
+
+print("w = {}, b = {}".format(w,b))
