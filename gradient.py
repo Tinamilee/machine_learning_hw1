@@ -68,12 +68,12 @@ y = list([0])
 for day in range(30):
     for hour in range(24):
         for k, _ in enumerate(range(len(w))):
-            data = measure.get_column_data(day, hour)
+            data = list(measure.get_column_data(day, hour))
             x = [int(data[9])]
-            w_fn = ft.partial(w_loss, y_hat=y[k], x=x, b=b)
+            w_fn = ft.partial(w_loss, y_hat=x[k], x=x, b=b)
             dw = partial_difference_quotient(w_fn, w, k, 0.001)
 
-            b_fn = ft.partial(b_loss, y_hat=y[k], w=w, x=x)
+            b_fn = ft.partial(b_loss, y_hat=x[k], w=w, x=x)
             db = partial_difference_quotient(b_fn, b, k, 0.001)
 
             w[k] = w[k] - eta * dw
