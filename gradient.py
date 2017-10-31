@@ -61,33 +61,38 @@ def partial_difference_quotient(f, v, i, h):
 
 
 """learning rate"""
-eta = 0.00001
-w = list([0])
-b = list([0])
+eta = 0.0000001
+w = list([0, 0, 0])
+b = list([0, 0, 0])
+last_x = list([0, 0, 0])
 
 """record for plotting"""
 w_history = list()
 b_history = list()
+for month in range(3):
+    for day in range(20):
+        for hour in range(24):
+            for k, _ in enumerate(range(len(w))):
+                data = list(measure.get_column_data(day, hour))
+                pm25 = float(data[9])
+                rainfall = float(data[10])
+                x = [last_x[1], pm25, rainfall]
+                w_fn = ft.partial(w_loss, y_hat=pm25, x=x, b=b)
+                dw = partial_difference_quotient(w_fn, w, k, 0.0001)
 
-for day in range(30):
-    for hour in range(24):
-        for k, _ in enumerate(range(len(w))):
-            data = list(measure.get_column_data(day, hour))
-            y_hat = int(data[9])
-            x = [int(data[9])]
-            w_fn = ft.partial(w_loss, y_hat=y_hat, x=x, b=b)
-            dw = partial_difference_quotient(w_fn, w, k, 0.0001)
+                b_fn = ft.partial(b_loss, y_hat=pm25, w=w, x=x)
+                db = partial_difference_quotient(b_fn, b, k, 0.0001)
 
-            b_fn = ft.partial(b_loss, y_hat=y_hat, w=w, x=x)
-            db = partial_difference_quotient(b_fn, b, k, 0.0001)
+                w[k] = w[k] - eta * dw
+                b[k] = b[k] - eta * db
 
-            w[k] = w[k] - eta * dw
-            b[k] = b[k] - eta * db
+                last_x = x
 
-            w_history.append(w[k])
-            b_history.append(b[k])
+            w_history.append(w[0])
+            b_history.append(b[0])
 
-final_tag = "final = ({0:.2f},  {1:.2f})".format(w[0],b[0])
+
+final_tag = "w = [{0:.1f}, {1:.1f}, {2:.1f}]".format(w[0],w[1],w[2])
 plt.plot(w_history, b_history, color='green', marker='.', linestyle='solid', label=final_tag)
 plt.title("w/b history")
 plt.ylabel("b history")
