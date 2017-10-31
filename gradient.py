@@ -61,7 +61,7 @@ def partial_difference_quotient(f, v, i, h):
 
 
 """learning rate"""
-eta = 0.0001
+eta = 0.00001
 w = list([0])
 b = list([0])
 
@@ -87,9 +87,10 @@ for day in range(30):
             w_history.append(w[k])
             b_history.append(b[k])
 
-
-plt.plot(w_history, b_history, color='green', marker='.', linestyle='solid')
+final_tag = "final = ({0:.2f},  {1:.2f})".format(w[0],b[0])
+plt.plot(w_history, b_history, color='green', marker='.', linestyle='solid', label=final_tag)
 plt.title("w/b history")
 plt.ylabel("b history")
 plt.xlabel("w history")
+plt.legend(loc=9)
 plt.show()
