@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 import functools as ft
+import matplotlib.pyplot as plt
 
 class Measure:
     HourField = 3
@@ -60,24 +61,35 @@ def partial_difference_quotient(f, v, i, h):
 
 
 """learning rate"""
-eta = 0.001
+eta = 0.0001
 w = list([0])
 b = list([0])
-y = list([0])
+
+"""record for plotting"""
+w_history = list()
+b_history = list()
 
 for day in range(30):
     for hour in range(24):
         for k, _ in enumerate(range(len(w))):
             data = list(measure.get_column_data(day, hour))
+            y_hat = int(data[9])
             x = [int(data[9])]
-            w_fn = ft.partial(w_loss, y_hat=x[k], x=x, b=b)
-            dw = partial_difference_quotient(w_fn, w, k, 0.001)
+            w_fn = ft.partial(w_loss, y_hat=y_hat, x=x, b=b)
+            dw = partial_difference_quotient(w_fn, w, k, 0.0001)
 
-            b_fn = ft.partial(b_loss, y_hat=x[k], w=w, x=x)
-            db = partial_difference_quotient(b_fn, b, k, 0.001)
+            b_fn = ft.partial(b_loss, y_hat=y_hat, w=w, x=x)
+            db = partial_difference_quotient(b_fn, b, k, 0.0001)
 
             w[k] = w[k] - eta * dw
             b[k] = b[k] - eta * db
-            y = x
 
-print("w = {}, b = {}".format(w,b))
+            w_history.append(w[k])
+            b_history.append(b[k])
+
+
+plt.plot(w_history, b_history, color='green', marker='.', linestyle='solid')
+plt.title("w/b history")
+plt.ylabel("b history")
+plt.xlabel("w history")
+plt.show()
